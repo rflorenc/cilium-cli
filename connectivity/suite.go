@@ -95,6 +95,9 @@ var (
 	//go:embed manifests/client-egress-l7-http-method.yaml
 	clientEgressL7HTTPMethodPolicyYAML string
 
+	//go:embed manifests/client-ingress-l7-from-outside.yaml
+	clientIngressL7FromOutside string
+
 	//go:embed manifests/client-egress-l7-http-named-port.yaml
 	clientEgressL7HTTPNamedPortPolicyYAML string
 
@@ -153,11 +156,13 @@ func Run(ctx context.Context, ct *check.ConnectivityTest) error {
 	if ct.Params().Datapath {
 		ct.NewTest("north-south-loadbalancing").
 			WithFeatureRequirements(check.RequireFeatureEnabled(check.FeatureNodeWithoutCilium)).
+			WithPolicy(clientIngressL7FromOutside).
 			WithScenarios(
 				tests.OutsideToNodePort(),
 			)
 
-		return ct.Run(ctx)
+		ct.Run(ctx)
+		panic("done")
 	}
 
 	// Run all tests without any policies in place.

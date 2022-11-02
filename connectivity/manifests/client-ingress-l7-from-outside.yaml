@@ -1,0 +1,28 @@
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: echo-ingress-l7-http-from-outside
+  namespace: cilium-test
+spec:
+  description: "Allow to GET on echo from outside"
+  endpointSelector:
+    matchLabels:
+      kind: echo
+  ingress:
+  - fromEntities:
+    - "world"
+    toPorts:
+    - ports:
+      - port: "8080"
+        protocol: TCP
+      rules:
+        http:
+        - method: "GET"
+          path: "/$"
+        - method: "GET"
+          path: "/public$"
+        - method: "GET"
+          path: "/private$"
+          headers:
+          - "X-Very-Secret-Token: 42"
