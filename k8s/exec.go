@@ -42,7 +42,7 @@ func (c *Client) execInPodWithWriters(ctx context.Context, p ExecParameters, std
 	req.VersionedParams(&corev1.PodExecOptions{
 		Command:   p.Command,
 		Container: p.Container,
-		Stdin:     p.TTY,
+		Stdin:     false,
 		Stdout:    true,
 		Stderr:    true,
 		TTY:       p.TTY,
@@ -53,17 +53,8 @@ func (c *Client) execInPodWithWriters(ctx context.Context, p ExecParameters, std
 		return fmt.Errorf("error while creating executor: %w", err)
 	}
 
-	var stdin io.ReadCloser
-	if p.TTY {
-		// CtrlCReader sends Ctrl-C/D sequence if context is cancelled
-		stdin = utils.NewCtrlCReader(ctx)
-		// Graceful close of stdin once we are done, no Ctrl-C is sent
-		// if execution finishes before the context expires.
-		defer stdin.Close()
-	}
-
 	err = exec.Stream(remotecommand.StreamOptions{
-		Stdin:  stdin,
+		Stdin:  nil,
 		Stdout: stdout,
 		Stderr: stderr,
 		Tty:    p.TTY,
