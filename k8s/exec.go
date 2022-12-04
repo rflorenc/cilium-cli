@@ -43,7 +43,7 @@ func (c *Client) execInPodWithWriters(ctx context.Context, p ExecParameters, std
 		Stdin:     false,
 		Stdout:    true,
 		Stderr:    true,
-		TTY:       p.TTY,
+		TTY:       false,
 	}, parameterCodec)
 
 	exec, err := remotecommand.NewSPDYExecutor(c.Config, "POST", req.URL())
@@ -52,10 +52,8 @@ func (c *Client) execInPodWithWriters(ctx context.Context, p ExecParameters, std
 	}
 
 	err = exec.Stream(remotecommand.StreamOptions{
-		Stdin:  nil,
 		Stdout: stdout,
 		Stderr: stderr,
-		Tty:    p.TTY,
 	})
 
 	return err
