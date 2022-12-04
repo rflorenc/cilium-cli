@@ -12,8 +12,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/remotecommand"
-
-	"github.com/cilium/cilium-cli/internal/utils"
 )
 
 type ExecResult struct {
