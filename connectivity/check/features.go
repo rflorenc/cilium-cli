@@ -44,6 +44,9 @@ const (
 
 	FeatureEncryptionPod  Feature = "encryption-pod"
 	FeatureEncryptionNode Feature = "encryption-node"
+
+	FeatureIPv4 Feature = "ipv4"
+	FeatureIPv6 Feature = "ipv6"
 )
 
 // FeatureStatus describes the status of a feature. Some features are either
@@ -171,6 +174,13 @@ func (ct *ConnectivityTest) extractFeaturesFromConfigMap(ctx context.Context, cl
 	result[FeatureTunnel] = FeatureStatus{
 		Enabled: mode != "disabled",
 		Mode:    mode,
+	}
+
+	result[FeatureIPv4] = FeatureStatus{
+		Enabled: cm.Data["enable-ipv4"] == "true",
+	}
+	result[FeatureIPv6] = FeatureStatus{
+		Enabled: cm.Data["enable-ipv6"] == "true",
 	}
 
 	return nil
