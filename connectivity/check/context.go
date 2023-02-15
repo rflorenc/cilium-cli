@@ -686,3 +686,18 @@ func (ct *ConnectivityTest) Feature(f Feature) (FeatureStatus, bool) {
 	s, ok := ct.features[f]
 	return s, ok
 }
+
+func (ct *ConnectivityTest) IsIPAddrFamilySupported(addr string) bool {
+	ip := net.ParseIP(addr)
+
+	if ip.To4() != nil {
+		f, ok := ct.features[FeatureIPv4]
+		return ok && f.Enabled
+	}
+	if ip.To4() == nil && ip.To16() != nil {
+		f, ok := ct.features[FeatureIPv6]
+		return ok && f.Enabled
+	}
+
+	return false
+}
