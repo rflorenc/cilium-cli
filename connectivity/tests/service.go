@@ -49,7 +49,7 @@ func (s *podToService) Run(ctx context.Context, t *check.Test) {
 				continue
 			}
 
-			t.NewAction(s, fmt.Sprintf("curl-%d", i), &pod, svc).Run(func(a *check.Action) {
+			t.NewAction(s, fmt.Sprintf("curl-%d", i), &pod, svc, check.IPFamilyNone).Run(func(a *check.Action) {
 				a.ExecInPod(ctx, ct.CurlCommand(svc, check.IPFamilyNone))
 
 				a.ValidateFlows(ctx, pod, a.GetEgressRequirements(check.FlowParameters{
@@ -161,7 +161,7 @@ func curlNodePort(ctx context.Context, s check.Scenario, t *check.Test,
 
 		// Create the Action with the original svc as this will influence what the
 		// flow matcher looks for in the flow logs.
-		t.NewAction(s, name, pod, svc).Run(func(a *check.Action) {
+		t.NewAction(s, name, pod, svc, check.IPFamilyNone).Run(func(a *check.Action) {
 			a.ExecInPod(ctx, t.Context().CurlCommand(ep, check.IPFamilyNone))
 
 			a.ValidateFlows(ctx, pod, a.GetEgressRequirements(check.FlowParameters{

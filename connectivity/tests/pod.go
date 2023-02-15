@@ -49,7 +49,7 @@ func (s *podToPod) Run(ctx context.Context, t *check.Test) {
 			if !hasAllLabels(echo, s.destinationLabels) {
 				continue
 			}
-			t.NewAction(s, fmt.Sprintf("curl-%d", i), &client, echo).Run(func(a *check.Action) {
+			t.NewAction(s, fmt.Sprintf("curl-%d", i), &client, echo, check.IPFamilyTODO).Run(func(a *check.Action) {
 				if s.method == "" {
 					a.ExecInPod(ctx, ct.CurlCommand(echo, check.IPFamilyTODO))
 				} else {
@@ -124,7 +124,7 @@ func (s *podToPodWithEndpoints) curlEndpoints(ctx context.Context, t *check.Test
 		url := fmt.Sprintf("%s/%s", baseURL, path)
 		ep := check.HTTPEndpointWithLabels(epName, url, echo.Labels())
 
-		t.NewAction(s, epName, client, ep).Run(func(a *check.Action) {
+		t.NewAction(s, epName, client, ep, check.IPFamilyNone).Run(func(a *check.Action) {
 			a.ExecInPod(ctx, ct.CurlCommand(ep, check.IPFamilyNone, curlOpts...))
 
 			a.ValidateFlows(ctx, client, a.GetEgressRequirements(check.FlowParameters{}))
@@ -137,7 +137,7 @@ func (s *podToPodWithEndpoints) curlEndpoints(ctx context.Context, t *check.Test
 			labels := echo.Labels()
 			labels["X-Very-Secret-Token"] = "42"
 			ep = check.HTTPEndpointWithLabels(epName, url, labels)
-			t.NewAction(s, epName, client, ep).Run(func(a *check.Action) {
+			t.NewAction(s, epName, client, ep, check.IPFamilyNone).Run(func(a *check.Action) {
 				opts := make([]string, 0, len(curlOpts)+2)
 				opts = append(opts, curlOpts...)
 				opts = append(opts, "-H", "X-Very-Secret-Token: 42")

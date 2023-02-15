@@ -44,7 +44,7 @@ func (s *podToHost) Run(ctx context.Context, t *check.Test) {
 		pod := pod // copy to avoid memory aliasing when using reference
 
 		for _, node := range nodes {
-			t.NewAction(s, fmt.Sprintf("ping-%d", i), &pod, node).Run(func(a *check.Action) {
+			t.NewAction(s, fmt.Sprintf("ping-%d", i), &pod, node, check.IPFamilyTODO).Run(func(a *check.Action) {
 				a.ExecInPod(ctx, ct.PingCommand(node, check.IPFamilyTODO))
 
 				a.ValidateFlows(ctx, pod, a.GetEgressRequirements(check.FlowParameters{
@@ -88,7 +88,7 @@ func (s *podToHostPort) Run(ctx context.Context, t *check.Test) {
 
 			baseURL := fmt.Sprintf("%s://%s:%d%s", echo.Scheme(), echo.Pod.Status.HostIP, check.EchoServerHostPort, echo.Path())
 			ep := check.HTTPEndpoint(echo.Name(), baseURL)
-			t.NewAction(s, fmt.Sprintf("curl-%d", i), &client, ep).Run(func(a *check.Action) {
+			t.NewAction(s, fmt.Sprintf("curl-%d", i), &client, ep, check.IPFamilyNone).Run(func(a *check.Action) {
 				a.ExecInPod(ctx, ct.CurlCommand(ep, check.IPFamilyNone))
 
 				a.ValidateFlows(ctx, client, a.GetEgressRequirements(check.FlowParameters{
