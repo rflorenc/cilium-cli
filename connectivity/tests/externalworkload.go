@@ -29,7 +29,7 @@ func (s *podToExternalWorkload) Run(ctx context.Context, t *check.Test) {
 
 		for _, wl := range ct.ExternalWorkloads() {
 			t.NewAction(s, fmt.Sprintf("ping-%d", i), &pod, wl).Run(func(a *check.Action) {
-				a.ExecInPod(ctx, ct.PingCommand(wl))
+				a.ExecInPod(ctx, ct.PingCommand(wl, check.IPFamilyTODO))
 
 				a.ValidateFlows(ctx, pod, a.GetEgressRequirements(check.FlowParameters{
 					Protocol: check.ICMP,

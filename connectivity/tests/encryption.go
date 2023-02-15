@@ -152,7 +152,7 @@ func testNoTrafficLeak(ctx context.Context, t *check.Test, s check.Scenario,
 	case requestICMPEcho:
 		// Ping the server from the client to generate some traffic
 		t.NewAction(s, "ping", client, server).Run(func(a *check.Action) {
-			a.ExecInPod(ctx, t.Context().PingCommand(server))
+			a.ExecInPod(ctx, t.Context().PingCommand(server, check.IPFamilyV4))
 		})
 	default:
 		t.Fatalf("Invalid request type: %d", reqType)

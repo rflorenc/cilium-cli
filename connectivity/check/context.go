@@ -593,8 +593,12 @@ func (ct *ConnectivityTest) CurlCommand(peer TestPeer, ipFam IPFamily, opts ...s
 	return cmd
 }
 
-func (ct *ConnectivityTest) PingCommand(peer TestPeer) []string {
+func (ct *ConnectivityTest) PingCommand(peer TestPeer, ipFam IPFamily) []string {
 	cmd := []string{"ping", "-c", "1"}
+
+	if ipFam == IPFamilyV6 {
+		cmd = append(cmd, "-6")
+	}
 
 	if connectTimeout := ct.params.ConnectTimeout.Seconds(); connectTimeout > 0.0 {
 		cmd = append(cmd, "-W", strconv.FormatFloat(connectTimeout, 'f', -1, 64))
@@ -603,7 +607,7 @@ func (ct *ConnectivityTest) PingCommand(peer TestPeer) []string {
 		cmd = append(cmd, "-w", strconv.FormatFloat(requestTimeout, 'f', -1, 64))
 	}
 
-	cmd = append(cmd, peer.Address(IPFamilyV4))
+	cmd = append(cmd, peer.Address(ipFam))
 	return cmd
 }
 

@@ -45,7 +45,7 @@ func (s *podToHost) Run(ctx context.Context, t *check.Test) {
 
 		for _, node := range nodes {
 			t.NewAction(s, fmt.Sprintf("ping-%d", i), &pod, node).Run(func(a *check.Action) {
-				a.ExecInPod(ctx, ct.PingCommand(node))
+				a.ExecInPod(ctx, ct.PingCommand(node, check.IPFamilyTODO))
 
 				a.ValidateFlows(ctx, pod, a.GetEgressRequirements(check.FlowParameters{
 					Protocol: check.ICMP,
