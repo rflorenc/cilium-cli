@@ -104,8 +104,8 @@ func (a *Action) Peers() string {
 	}
 
 	return fmt.Sprintf("%s (%s) -> %s (%s:%d)",
-		a.src.Name(), a.src.Address(),
-		a.dst.Name(), a.dst.Address(), a.dst.Port())
+		a.src.Name(), a.src.Address(IPFamilyV4),
+		a.dst.Name(), a.dst.Address(IPFamilyV4), a.dst.Port())
 }
 
 func (a *Action) Source() TestPeer {
@@ -423,8 +423,8 @@ func (a *Action) matchFlowRequirements(ctx context.Context, flows flowsSet, req 
 }
 
 func (a *Action) GetEgressRequirements(p FlowParameters) (reqs []filters.FlowSetRequirement) {
-	srcIP := a.src.Address()
-	dstIP := a.dst.Address()
+	srcIP := a.src.Address(IPFamilyV4)
+	dstIP := a.dst.Address(IPFamilyV4)
 	if dstIP != "" && net.ParseIP(dstIP) == nil {
 		// dstIP is not an IP address, assume it is a domain name
 		dstIP = ""
@@ -557,7 +557,7 @@ func (a *Action) GetEgressRequirements(p FlowParameters) (reqs []filters.FlowSet
 
 		dns := filters.FlowSetRequirement{First: filters.FlowRequirement{Filter: filters.And(ipRequest, dnsRequest), Msg: "DNS request"}}
 		if a.expEgress.DNSProxy {
-			qname := a.dst.Address() + "."
+			qname := a.dst.Address(IPFamilyV4) + "."
 			dns.Middle = []filters.FlowRequirement{{Filter: filters.And(ipResponse, dnsResponse), Msg: "DNS response"}}
 			dns.Last = filters.FlowRequirement{Filter: filters.And(ipResponse, dnsResponse, filters.DNS(qname, 0)), Msg: "DNS proxy"}
 			// 5 is the default rcode returned on error such as policy deny
@@ -582,8 +582,8 @@ func (a *Action) GetIngressRequirements(p FlowParameters) []filters.FlowSetRequi
 		return []filters.FlowSetRequirement{}
 	}
 
-	srcIP := a.src.Address()
-	dstIP := a.dst.Address()
+	srcIP := a.src.Address(IPFamilyV4)
+	dstIP := a.dst.Address(IPFamilyV4)
 	if dstIP != "" && net.ParseIP(dstIP) == nil {
 		// dstIP is not an IP address, assume it is a domain name
 		dstIP = ""

@@ -51,9 +51,9 @@ func (s *podToPod) Run(ctx context.Context, t *check.Test) {
 			}
 			t.NewAction(s, fmt.Sprintf("curl-%d", i), &client, echo).Run(func(a *check.Action) {
 				if s.method == "" {
-					a.ExecInPod(ctx, ct.CurlCommand(echo))
+					a.ExecInPod(ctx, ct.CurlCommand(echo, check.IPFamilyTODO))
 				} else {
-					a.ExecInPod(ctx, ct.CurlCommand(echo, "-X", s.method))
+					a.ExecInPod(ctx, ct.CurlCommand(echo, check.IPFamilyTODO, "-X", s.method))
 				}
 
 				a.ValidateFlows(ctx, client, a.GetEgressRequirements(check.FlowParameters{}))
@@ -112,7 +112,7 @@ func (s *podToPodWithEndpoints) Run(ctx context.Context, t *check.Test) {
 func (s *podToPodWithEndpoints) curlEndpoints(ctx context.Context, t *check.Test, name string,
 	client *check.Pod, echo check.TestPeer) {
 	ct := t.Context()
-	baseURL := fmt.Sprintf("%s://%s:%d", echo.Scheme(), echo.Address(), echo.Port())
+	baseURL := fmt.Sprintf("%s://%s:%d", echo.Scheme(), echo.Address(check.IPFamilyTODO), echo.Port())
 	var curlOpts []string
 	if s.method != "" {
 		curlOpts = append(curlOpts, "-X", s.method)
@@ -125,7 +125,7 @@ func (s *podToPodWithEndpoints) curlEndpoints(ctx context.Context, t *check.Test
 		ep := check.HTTPEndpointWithLabels(epName, url, echo.Labels())
 
 		t.NewAction(s, epName, client, ep).Run(func(a *check.Action) {
-			a.ExecInPod(ctx, ct.CurlCommand(ep, curlOpts...))
+			a.ExecInPod(ctx, ct.CurlCommand(ep, check.IPFamilyNone, curlOpts...))
 
 			a.ValidateFlows(ctx, client, a.GetEgressRequirements(check.FlowParameters{}))
 			a.ValidateFlows(ctx, ep, a.GetIngressRequirements(check.FlowParameters{}))
@@ -142,7 +142,7 @@ func (s *podToPodWithEndpoints) curlEndpoints(ctx context.Context, t *check.Test
 				opts = append(opts, curlOpts...)
 				opts = append(opts, "-H", "X-Very-Secret-Token: 42")
 
-				a.ExecInPod(ctx, ct.CurlCommand(ep, opts...))
+				a.ExecInPod(ctx, ct.CurlCommand(ep, check.IPFamilyNone, opts...))
 
 				a.ValidateFlows(ctx, client, a.GetEgressRequirements(check.FlowParameters{}))
 				a.ValidateFlows(ctx, ep, a.GetIngressRequirements(check.FlowParameters{}))
