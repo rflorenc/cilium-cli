@@ -49,15 +49,17 @@ func (s *podToPod) Run(ctx context.Context, t *check.Test) {
 			if !hasAllLabels(echo, s.destinationLabels) {
 				continue
 			}
-			t.NewAction(s, fmt.Sprintf("curl-%d", i), &client, echo, check.IPFamilyTODO).Run(func(a *check.Action) {
-				if s.method == "" {
-					a.ExecInPod(ctx, ct.CurlCommand(echo, check.IPFamilyTODO))
-				} else {
-					a.ExecInPod(ctx, ct.CurlCommand(echo, check.IPFamilyTODO, "-X", s.method))
-				}
+			ct.ForEachIPFamily(func(ipFam check.IPFamily) {
+				t.NewAction(s, fmt.Sprintf("curl-%d", i), &client, echo, ipFam).Run(func(a *check.Action) {
+					if s.method == "" {
+						a.ExecInPod(ctx, ct.CurlCommand(echo, ipFam))
+					} else {
+						a.ExecInPod(ctx, ct.CurlCommand(echo, ipFam, "-X", s.method))
+					}
 
-				a.ValidateFlows(ctx, client, a.GetEgressRequirements(check.FlowParameters{}))
-				a.ValidateFlows(ctx, echo, a.GetIngressRequirements(check.FlowParameters{}))
+					a.ValidateFlows(ctx, client, a.GetEgressRequirements(check.FlowParameters{}))
+					a.ValidateFlows(ctx, echo, a.GetIngressRequirements(check.FlowParameters{}))
+				})
 			})
 
 			i++
@@ -102,7 +104,9 @@ func (s *podToPodWithEndpoints) Run(ctx context.Context, t *check.Test) {
 				continue
 			}
 
-			s.curlEndpoints(ctx, t, fmt.Sprintf("curl-%d", i), &client, echo)
+			ct.ForEachIPFamily(func(ipFam check.IPFamily) {
+				s.curlEndpoints(ctx, t, fmt.Sprintf("curl-%d", i), &client, echo, ipFam)
+			})
 
 			i++
 		}
@@ -110,9 +114,9 @@ func (s *podToPodWithEndpoints) Run(ctx context.Context, t *check.Test) {
 }
 
 func (s *podToPodWithEndpoints) curlEndpoints(ctx context.Context, t *check.Test, name string,
-	client *check.Pod, echo check.TestPeer) {
+	client *check.Pod, echo check.TestPeer, ipFam check.IPFamily) {
 	ct := t.Context()
-	baseURL := fmt.Sprintf("%s://%s:%d", echo.Scheme(), echo.Address(check.IPFamilyTODO), echo.Port())
+	baseURL := fmt.Sprintf("%s://%s:%d", echo.Scheme(), echo.Address(ipFam), echo.Port())
 	var curlOpts []string
 	if s.method != "" {
 		curlOpts = append(curlOpts, "-X", s.method)
