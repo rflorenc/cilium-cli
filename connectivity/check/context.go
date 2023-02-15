@@ -705,3 +705,21 @@ func (ct *ConnectivityTest) IsIPAddrFamilySupported(addr string) bool {
 
 	return false
 }
+
+func (ct *ConnectivityTest) ForEachIPFamily(do func(IPFamily)) {
+	fams := []IPFamily{}
+
+	f, ok := ct.features[FeatureIPv4]
+	if ok && f.Enabled {
+		fams = append(fams, IPFamilyV4)
+	}
+
+	f, ok = ct.features[FeatureIPv6]
+	if ok && f.Enabled {
+		fams = append(fams, IPFamilyV6)
+	}
+
+	for _, fam := range fams {
+		do(fam)
+	}
+}
