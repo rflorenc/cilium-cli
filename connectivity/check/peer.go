@@ -83,7 +83,7 @@ func (p Pod) Path() string {
 func (p Pod) Address(family IPFamily) string {
 	for _, addr := range p.Pod.Status.PodIPs {
 		ip := net.ParseIP(addr.IP)
-		if family == IPFamilyV4 && ip.To4() != nil {
+		if (family == IPFamilyV4 || family == IPFamilyNone) && ip.To4() != nil {
 			return addr.IP
 		}
 		if family == IPFamilyV6 && ip.To4() == nil && ip.To16() != nil {
